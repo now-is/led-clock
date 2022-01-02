@@ -1,7 +1,9 @@
 #!/usr/bin/env lua
 
-local C = require 'curses'; 
-local L = require 'led'
+-- luarocks deps: lcurses, sleep
+local C = require 'curses'
+local LED = require 'led'
+local sleep = require 'sleep'
 
 local function split_on_char (c, text)
 	local l = {}
@@ -32,25 +34,25 @@ local function paint_rectangle (scr, l, c, rect)
 	end
 end
 
-local function hello ()
+C.initscr()
+-- disable line buffering
+C.cbreak()
+C.echo(false)
 
-  C.initscr()
-  -- disable line buffering
-  C.raw()
-  C.echo(false)
+local scr = C.stdscr()
+scr:nodelay(true)
 
-  local scr = C.stdscr()
+while true do
   scr:clear()
-  paint_rectangle(scr, 1, 10, L.digit(6, '@'))
+  paint_rectangle(scr, 1, 10, LED.digit(os.time() % 10, '@'))
   scr:move(0, 0)
   scr:refresh()
 
-  local ch = scr:getch()
-
-  -- free curses memory
-  C.endwin()
-
-  return(ch)
+  if scr:getch() == 113 then -- 'q'
+	  break
+  end
+  sleep(1000)
 end
 
-print(hello())
+-- free curses memory
+C.endwin()
