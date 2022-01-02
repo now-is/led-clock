@@ -35,7 +35,7 @@ local quit_ch = string.byte('q')
 while true do
 	scr:clear()
 	local sec = tostring(os.time() % 60)
-	paint.rectangles(scr, 5, 10, rectangles_of(os.date('%H:%M'), '@'), 6)
+	paint.rectangles(scr, 8, 6, rectangles_of(os.date('%H:%M'), '@'), 6)
 	scr:move(0, 0)
 	scr:refresh()
 
