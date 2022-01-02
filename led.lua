@@ -1,5 +1,3 @@
-#!/usr/bin/env lua
-
 local led_segments = [[
  c11111111111111111111111111111d
 22c111111111111111111111111111d33
@@ -64,4 +62,6 @@ function digit (j, char)
 	return segments
 end
 
-print(digit(0+arg[1], arg[2]))
+return {
+	digit = digit,
+}

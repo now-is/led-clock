@@ -1,6 +1,7 @@
 #!/usr/bin/env lua
 
 local C = require 'curses'; 
+local L = require 'led'
 
 local function split_on_char (c, text)
 	local l = {}
@@ -40,7 +41,7 @@ local function hello ()
 
   local scr = C.stdscr()
   scr:clear()
-  paint_rectangle(scr, 1, 10, 'Hell\nOr\nHigh\nWater')
+  paint_rectangle(scr, 1, 10, L.digit(6, '@'))
   scr:move(0, 0)
   scr:refresh()
 
