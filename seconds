@@ -8,8 +8,13 @@ local sleep = require 'sleep'
 
 local function rectangles_of (str, fill_char)
 	local rectangles = {}
+	local d
 	for c in str:gmatch('.') do
-		local d = LED.digit(tonumber(c), fill_char)
+		if c == ':' then
+			d = LED.colon:gsub('%S', fill_char)
+		else
+			d = LED.digit(tonumber(c), fill_char)
+		end
 		if d ~= nil then
 			rectangles[#rectangles+1] = d
 		end
@@ -33,7 +38,7 @@ while true do
 	if #sec < 2 then
 		sec = '0' .. sec
 	end
-	paint.rectangles(scr, 5, 10, rectangles_of(sec, '@'), 6)
+	paint.rectangles(scr, 5, 10, rectangles_of('0:' .. sec, '@'), 6)
 	scr:move(0, 0)
 	scr:refresh()
 
