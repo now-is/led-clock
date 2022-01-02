@@ -1,10 +1,3 @@
-#!/usr/bin/env lua
-
--- luarocks deps: lcurses, sleep
-local C = require 'curses'
-local LED = require 'led'
-local sleep = require 'sleep'
-
 local function split_on_char (c, text)
 	local l = {}
 	if #text == 0 then
@@ -52,42 +45,6 @@ local function paint_rectangles (scr, l, c, rects, space)
 	end
 end
 
-local function rectangles_of (str, fill_char)
-	local rectangles = {}
-	for c in str:gmatch('.') do
-		local d = LED.digit(tonumber(c), fill_char)
-		if d ~= nil then
-			rectangles[#rectangles+1] = d
-		end
-	end
-	return rectangles
-end
-
-C.initscr()
--- disable line buffering
-C.cbreak()
-C.echo(false)
-
-local scr = C.stdscr()
-scr:nodelay(true)
-
-local quit_char = string.byte('q')
-
-while true do
-	scr:clear()
-	local sec = tostring(os.time() % 60)
-	if #sec < 2 then
-		sec = '0' .. sec
-	end
-	paint_rectangles(scr, 5, 10, rectangles_of(sec, '@'), 6)
-	scr:move(0, 0)
-	scr:refresh()
-
-	if scr:getch() == quit_char then
-		break
-	end
-	sleep(1000)
-end
-
--- free curses memory
-C.endwin()
+return {
+	rectangles = paint_rectangles,
+}
