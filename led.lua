@@ -50,6 +50,9 @@ local led_spec = {
 local cements = 'cdfgijlmyz'
 
 function digit (j, char)
+	if unpack == nil then
+		unpack = table.unpack
+	end
 	local segments, cement = unpack(led_spec[j])
 	if segments == nil then
 		return
