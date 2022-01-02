@@ -27,24 +27,27 @@ local function paint_rectangle (scr, l, c, rect)
 	end
 end
 
-local function rectangle_width (rect)
+local function rectangle_dim (rect)
 	local width = 0
-	for _, line in ipairs(split_on_char('\n', rect)) do
+	local lines = split_on_char('\n', rect)
+	for _, line in ipairs(lines) do
 		if width < #line then
 			width = #line
 		end
 	end
-	return width
+	return width, #lines
 end
 
 local function paint_rectangles (scr, l, c, rects, space)
 	local width
 	for _, rect in ipairs(rects) do
 		paint_rectangle(scr, l, c, rect)
-		c = c + rectangle_width(rect) + space
+		width = rectangle_dim(rect)
+		c = c + width + space
 	end
 end
 
 return {
 	rectangles = paint_rectangles,
+	dim        = rectangle_dim,
 }
