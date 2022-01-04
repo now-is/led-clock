@@ -32,16 +32,19 @@ scr:nodelay(true)
 
 local quit_ch = string.byte('q')
 
+local sec0 = '60'
 while true do
-	scr:clear()
-	local sec = tostring(os.time() % 60)
-	paint.rectangles(scr, 8, 6, rectangles_of(os.date('%H:%M'), '@'), 6)
-	scr:move(0, 0)
-	scr:refresh()
-
+	local sec1 = tostring(os.time() % 60)
+	if sec1 < sec0 then
+		scr:clear()
+		paint.rectangles(scr, 8, 6, rectangles_of(os.date('%H:%M'), '@'), 6)
+		scr:move(0, 0)
+		scr:refresh()
+	end
 	if scr:getch() == quit_ch then
 		break
 	end
+	sec0 = sec1
 	sleep(1000)
 end
 
