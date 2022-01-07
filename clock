@@ -22,6 +22,18 @@ local function rectangles_of (str, fill_char)
 	return rectangles
 end
 
+local _, digit_height = paint.dim(LED.digit(0, '@'))
+
+-- positioning: tune to taste
+local l_zero, c_zero, c_space = 8, 6, 6
+local l_blips, c_blips = l_zero + digit_height + 2, c_zero
+
+local blip, noblip, blip_stride = '@@', '  ', 3
+local function update_blip (scr, sec, str)
+	if sec > 0 then
+		scr:mvaddstr(l_blips, c_zero + blip_stride*(sec - 1), str)
+	end
+end
 
 C.initscr()
 C.cbreak()
@@ -32,15 +44,19 @@ scr:nodelay(true)
 
 local quit_ch = string.byte('q')
 
-local sec0 = '60'
+local sec0 = 60
 while true do
-	local sec1 = tostring(os.time() % 60)
+	local sec1 = os.time() % 60
 	if sec1 < sec0 then
 		scr:clear()
-		paint.rectangles(scr, 8, 6, rectangles_of(os.date('%H:%M'), '@'), 6)
-		scr:move(0, 0)
-		scr:refresh()
+		paint.rectangles(scr, l_zero, c_zero, rectangles_of(os.date('%H:%M'), '@'), c_space)
+	else
+		update_blip(scr, sec0, noblip)
 	end
+	update_blip(scr, sec1, blip)
+	scr:move(0, 0)
+	scr:refresh()
+
 	if scr:getch() == quit_ch then
 		break
 	end
