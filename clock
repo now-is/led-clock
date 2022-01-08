@@ -26,12 +26,14 @@ local _, digit_height = paint.dim(LED.digit(0, '@'))
 
 -- positioning: tune to taste
 local l_zero, c_zero, c_space = 8, 6, 6
-local l_blips, c_blips = l_zero + digit_height + 2, c_zero
+local l_blips, c_blips = l_zero + digit_height + 3, c_zero
 
-local blip, noblip, blip_stride = '@@', '  ', 3
+local blip, noblip, blip_stride = '@@@@@@', '      ', 3
 local function update_blip (scr, sec, str)
+	local c = c_zero + blip_stride*(sec - 1)
 	if sec > 0 then
-		scr:mvaddstr(l_blips, c_zero + blip_stride*(sec - 1), str)
+		scr:mvaddstr(l_blips, c, str)
+		scr:mvaddstr(l_blips+1, c-1, str)
 	end
 end
 
