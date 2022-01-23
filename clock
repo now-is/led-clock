@@ -49,22 +49,24 @@ local scr = C.stdscr()
 scr:nodelay(true)
 
 local keys = {
-	quit = string.byte('q')
+	pause = string.byte('p'),
+	quit = string.byte('q'),
 }
 local key
 
-local sec0 = 60
-while true do
-	local sec1 = os.time() % 60
-	if sec1 < sec0 then
-		scr:clear()
-		paint.rectangles(scr, l_zero, c_zero, rectangles_of(os.date('%H:%M'), '@'), c_space)
-	else
-		update_blip(scr, sec0, noblip)
-	end
-	update_blip(scr, sec1, blip)
+local sec0, sec1 = 60
 
+while true do
 	if state == states.running then
+		sec1 = os.time() % 60
+		if sec1 < sec0 then
+			scr:clear()
+			paint.rectangles(scr, l_zero, c_zero, rectangles_of(os.date('%H:%M'), '@'), c_space)
+		else
+			update_blip(scr, sec0, noblip)
+		end
+		update_blip(scr, sec1, blip)
+
 		scr:move(0, 0)
 		scr:refresh()
 	end
@@ -73,9 +75,16 @@ while true do
 	if key == keys.quit then
 		break
 	end
-	sec0 = sec1
+	if key == keys.pause then
+		if state == states.running then
+			state = states.pause
+		else
+			state = states.running
+		end
+	end
 
 	if state == states.running then
+		sec0 = sec1
 		sleep(1000)
 	end
 end
