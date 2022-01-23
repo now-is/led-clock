@@ -2,9 +2,13 @@
 
 -- luarocks: lcurses sleep
 local C = require 'curses'
+local Enum = require 'enum'
 local LED = require 'led'
 local paint = require 'paint'
 local sleep = require 'sleep'
+
+local states = Enum({'running', 'paused'})
+local state = states.running
 
 local function rectangles_of (str, fill_char)
 	local rectangles = {}
@@ -44,7 +48,10 @@ C.echo(false)
 local scr = C.stdscr()
 scr:nodelay(true)
 
-local quit_ch = string.byte('q')
+local keys = {
+	quit = string.byte('q')
+}
+local key
 
 local sec0 = 60
 while true do
@@ -56,14 +63,21 @@ while true do
 		update_blip(scr, sec0, noblip)
 	end
 	update_blip(scr, sec1, blip)
-	scr:move(0, 0)
-	scr:refresh()
 
-	if scr:getch() == quit_ch then
+	if state == states.running then
+		scr:move(0, 0)
+		scr:refresh()
+	end
+
+	key = scr:getch()
+	if key == keys.quit then
 		break
 	end
 	sec0 = sec1
-	sleep(1000)
+
+	if state == states.running then
+		sleep(1000)
+	end
 end
 
 C.endwin()
