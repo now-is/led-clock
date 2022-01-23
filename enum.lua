@@ -49,7 +49,7 @@ It's a trade off between tokens and elegant code.
 
 ]]--
 
-function enum(names, offset)
+local function enum(names, offset)
 	offset=offset or 1
 	local objects = {}
 	local size=0
@@ -70,10 +70,12 @@ function enum(names, offset)
 	objects.all = function()
 		local list = {}
 		for _,name in pairs(names) do
-			add(list,objects[name])
+			list[#list+1] = objects[name]
 		end
 		local i=0
 		return function() i=i+1 if i<=#list then return list[i] end end
 	end
 	return objects
 end
+
+return enum
