@@ -30,7 +30,7 @@ local _, digit_height = paint.dim(LED.digit(0, '@'))
 
 -- positioning: tune to taste
 local l_zero, c_zero, c_space = 8, 6, 6
-local l_blips, c_blips = l_zero + digit_height + 3, c_zero
+local l_blips = l_zero + digit_height + 3
 
 local blip, noblip, blip_stride = '@@@@@@', '      ', 3
 local function update_blip (scr, sec, str)
@@ -39,6 +39,21 @@ local function update_blip (scr, sec, str)
 		scr:mvaddstr(l_blips, c, str)
 		scr:mvaddstr(l_blips+1, c-1, str)
 	end
+end
+
+local function paint_markers (scr)
+	local marker_sm, marker_lg, seconds_interval = " @\n@@", " @\n@@\n@@", 5
+	local markers = {}
+	for i = 1, 60/seconds_interval - 1 do
+		if i % 2 == 0 then
+			markers[i] = marker_lg
+		else
+			markers[i] = marker_sm
+		end
+	end
+	-- l = l_blips + blip-height + 1
+	-- space = blip_stride * seconds_interval - marker-width
+	paint.rectangles(scr, l_blips + 3, c_zero + 10, markers, blip_stride * seconds_interval - 2)
 end
 
 C.initscr()
@@ -61,6 +76,7 @@ while true do
 		sec1 = os.time() % 60
 		if sec1 < sec0 then
 			scr:clear()
+			paint_markers(scr)
 			paint.rectangles(scr, l_zero, c_zero, rectangles_of(os.date('%H:%M'), '@'), c_space)
 		else
 			update_blip(scr, sec0, noblip)
