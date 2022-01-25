@@ -71,38 +71,46 @@ local key
 
 local sec0, sec1 = 60
 
-while true do
-	if state == states.running then
-		sec1 = os.time() % 60
-		if sec1 < sec0 then
-			scr:clear()
-			paint_markers(scr)
-			paint.rectangles(scr, l_zero, c_zero, rectangles_of(os.date('%H:%M'), '@'), c_space)
-		else
-			update_blip(scr, sec0, noblip)
-		end
-		update_blip(scr, sec1, blip)
-
-		scr:move(0, 0)
-		scr:refresh()
-	end
-
-	key = scr:getch()
-	if key == keys.quit then
-		break
-	end
-	if key == keys.pause then
+local function main ()
+	while true do
 		if state == states.running then
-			state = states.pause
-		else
-			state = states.running
-		end
-	end
+			sec1 = os.time() % 60
+			if sec1 < sec0 then
+				scr:clear()
+				paint_markers(scr)
+				paint.rectangles(scr, l_zero, c_zero, rectangles_of(os.date('%H:%M'), '@'), c_space)
+			else
+				update_blip(scr, sec0, noblip)
+			end
+			update_blip(scr, sec1, blip)
 
-	if state == states.running then
-		sec0 = sec1
-		sleep(1000)
+			scr:move(0, 0)
+			scr:refresh()
+		end
+
+		key = scr:getch()
+		if key == keys.quit then
+			break
+		end
+		if key == keys.pause then
+			if state == states.running then
+				state = states.pause
+			else
+				state = states.running
+			end
+		end
+
+		if state == states.running then
+			sec0 = sec1
+			sleep(1000)
+		end
 	end
 end
 
-C.endwin()
+local function err (err)
+	C.endwin()
+	print(debug.traceback(err, 2))
+	os.exit(2)
+end
+
+xpcall(main, err)
