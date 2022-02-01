@@ -1,17 +1,29 @@
 #!/usr/bin/env lua
 
+-- 1,1 3,7 9,13 15,19 21,25
+local map = {}
+local w, h = 5, 4
+
 while true do
 	local line = io.read()
 	if line == nil then break end
 
-	local glyph = line
-		:sub(3)
-		:gsub('f', '█')
-		:gsub('l', '▄')
-		:gsub('t', '▀')
-		:gsub(' ', '\n')
-		:gsub('%.', ' ')
+	local k, pos = line:sub(1,1), 3
+	map[k] = {}
+	for r = 1,h do
+		map[k][r] = line:sub(pos, pos+w-1)
+			:gsub('f', '█')
+			:gsub('l', '▄')
+			:gsub('t', '▀')
+			:gsub('%.', ' ')
+		pos = pos + w + 1
+	end
+end
 
-	print(glyph)
+local word = arg[1]
+for r = 1,h do
+	for i=1,#word do
+		io.write(map[word:sub(i,i)][r] .. '  ')
+	end
 	print('')
 end
