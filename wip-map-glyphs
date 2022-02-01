@@ -1,0 +1,15 @@
+#!/usr/bin/env lua
+
+while true do
+	local line = io.read()
+	if line == nil then break end
+
+	local glyph = line
+		:gsub('f', '█')
+		:gsub('l', '▄')
+		:gsub('t', '▀')
+		:gsub(' ', '\n')
+		:gsub('%.', ' ')
+
+	print(glyph)
+end
