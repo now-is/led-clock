@@ -5,6 +5,7 @@ while true do
 	if line == nil then break end
 
 	local glyph = line
+		:sub(3)
 		:gsub('f', '█')
 		:gsub('l', '▄')
 		:gsub('t', '▀')
@@ -12,4 +13,5 @@ while true do
 		:gsub('%.', ' ')
 
 	print(glyph)
+	print('')
 end
