@@ -1,6 +1,6 @@
 #!/usr/bin/env lua
 
--- luarocks: luautf8 lcurses sleep
+-- luarocks: luautf8 lcurses sleep xml
 local C = require 'curses'
 local Enum = require 'enum'
 local LED = require 'led'
