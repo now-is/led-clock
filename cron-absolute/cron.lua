@@ -11,6 +11,12 @@ local function isCallable(callback)
   return false
 end
 
+local function checkInteger(name, value)
+  if type(value) ~= "number" then
+    error(name .. " must be a number")
+  end
+end
+
 local function checkPositiveInteger(name, value)
   if type(value) ~= "number" or value < 0 then
     error(name .. " must be a positive number")
@@ -59,13 +65,14 @@ local function updateEveryClock(self, dt)
   return false
 end
 
-function Clock:reset(running)
-  running = running or 0
-  checkPositiveInteger('running', running)
-
-  self.running = running
+function Clock:set(t)
+  checkInteger('t', t)
+  if self.started == nil then
+	  self.started = t
+  else
+	  self:update(t - self.started)
+  end
 end
-
 
 function cron.after(time, callback, ...)
   return newClock(time, callback, updateAfterClock, ...)
@@ -76,4 +83,3 @@ function cron.every(time, callback, ...)
 end
 
 return cron
-
