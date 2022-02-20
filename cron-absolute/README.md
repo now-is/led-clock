@@ -21,7 +21,10 @@ Clock methods:
 `local expired = clock:set(t)`.
 Sets the time in the clock to `t`.
 
-* The first `set` on a clock sets its start time. It never invokes a callback. On subsequent `set`s:
+The first `set` on a clock sets its start time. It does not invoke a callback and returns false, i.e. not expired.
+
+On subsequent `set`s:
+
 * A one-time clock invokes its `callback` if the time has increased by more than its `interval` from its start time.
 * A periodic clock invokes its `callback` 0 or more times, depending on how much its time has increased.
 * `expired` is true for one-time clocks whose `callback` has been invoked.

@@ -80,7 +80,7 @@ describe('cron', function ()
 
 		it('reports its expiration', function ()
 			local c1 = cron.after(2, increment)
-			c1:set(0)
+			assert.is_false(c1:set(0))
 			assert.is_false(c1:set(1))
 			assert.is_true(c1:set(2))
 			assert.is_true(c1:set(3))

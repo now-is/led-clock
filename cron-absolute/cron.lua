@@ -40,7 +40,7 @@ function Clock:set (t)
 	assert(isInteger(t), 'attempt to set clock to a non-integer')
 	if self.start == nil then
 		self.start = t
-		return
+		return false
 	end
 
 	assert(isPositiveInteger(t - self.start), 'attempt to set clock too far back')
