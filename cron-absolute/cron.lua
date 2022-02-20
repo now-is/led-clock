@@ -1,85 +1,72 @@
-local cron = {
-}
-
-local function isCallable(callback)
-  local tc = type(callback)
-  if tc == 'function' then return true end
-  if tc == 'table' then
-    local mt = getmetatable(callback)
-    return type(mt) == 'table' and type(mt.__call) == 'function'
-  end
-  return false
+local function isCallable (callback)
+	local tc = type(callback)
+	if tc == 'function' then return true end
+	if tc == 'table' then
+		local mt = getmetatable(callback)
+		return type(mt) == 'table' and type(mt.__call) == 'function'
+	end
+	return false
 end
 
-local function checkInteger(name, value)
-  if type(value) ~= "number" then
-    error(name .. " must be a number")
-  end
+local function isInteger (value)
+	return type(value) == 'number' and math.floor(value) == value
 end
 
-local function checkPositiveInteger(name, value)
-  if type(value) ~= "number" or value < 0 then
-    error(name .. " must be a positive number")
-  end
+local function isPositiveInteger (value)
+	return isInteger(value) and value > 0
 end
 
 local Clock = {}
 local Clock_mt = {__index = Clock}
 
-local function newClock(time, callback, update, ...)
-  checkPositiveInteger('time', time)
-  assert(isCallable(callback), "callback must be a function")
+local function newClock (interval, callback, limit, ...)
+	assert(isPositiveInteger(interval), 'interval not a positive integer')
+	assert(isInteger(limit), 'limit not an integer')
+	assert(isCallable(callback), 'callback not a function')
 
-  return setmetatable({
-    time     = time,
-    callback = callback,
-    args     = {...},
-    running  = 0,
-    update   = update
-  }, Clock_mt)
+	return setmetatable({
+		interval = interval,
+		callback = callback,
+		limit    = limit,
+		number   = 0,
+		args     = {...},
+		start    = nil,
+	}, Clock_mt)
 end
 
-local function updateAfterClock(self, dt) -- returns true if expired
-  checkPositiveInteger('dt', dt)
+function Clock:set (t)
+	assert(isInteger(t), 'attempt to set clock to a non-integer')
+	if self.start == nil then
+		self.start = t
+		return
+	end
 
-  if self.running >= self.time then return true end
+	assert(isPositiveInteger(t - self.start), 'attempt to set clock too far back')
 
-  self.running = self.running + dt
-
-  if self.running >= self.time then
-    self.callback(unpack(self.args))
-    return true
-  end
-  return false
+	local expired = false
+	while true do
+		if self.limit > 0 and self.number >= self.limit then
+			expired = true
+			break
+		end
+		local tick = self.start + self.interval
+		if tick > t then
+			break
+		end
+		self.callback(tick, unpack(self.args))
+		self.start = tick
+		self.number = self.number + 1
+	end
+	return expired
 end
 
-local function updateEveryClock(self, dt)
-  checkPositiveInteger('dt', dt)
+return {
+	after = function (interval, callback, ...)
+		return newClock(interval, callback, 1, ...)
+	end,
 
-  self.running = self.running + dt
-
-  while self.running >= self.time do
-    self.callback(unpack(self.args))
-    self.running = self.running - self.time
-  end
-  return false
-end
-
-function Clock:set(t)
-  checkInteger('t', t)
-  if self.started == nil then
-	  self.started = t
-  else
-	  self:update(t - self.started)
-  end
-end
-
-function cron.after(time, callback, ...)
-  return newClock(time, callback, updateAfterClock, ...)
-end
-
-function cron.every(time, callback, ...)
-  return newClock(time, callback, updateEveryClock, ...)
-end
-
-return cron
+	-- see above: limit = 0 means unlimited
+	every = function (interval, callback, ...)
+		return newClock(interval, callback, 0, ...)
+	end
+}
