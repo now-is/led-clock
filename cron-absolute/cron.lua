@@ -19,18 +19,20 @@ end
 local Clock = {}
 local Clock_mt = {__index = Clock}
 
-local function newClock (interval, callback, limit, ...)
+local function newClock (limit, interval, callback, ...)
 	assert(isPositiveInteger(interval), 'interval not a positive integer')
 	assert(isInteger(limit), 'limit not an integer')
 	assert(isCallable(callback), 'callback not a function')
 
 	return setmetatable({
-		interval = interval,
-		callback = callback,
-		limit    = limit,
-		number   = 0,
-		args     = {...},
-		start    = nil,
+		interval  = interval,
+		callback  = callback,
+		limit     = limit,
+		number    = 0,
+		args      = {...},
+		start     = nil,
+		post_call = nil,
+		post_args = {}
 	}, Clock_mt)
 end
 
@@ -43,7 +45,7 @@ function Clock:set (t)
 
 	assert(isPositiveInteger(t - self.start), 'attempt to set clock too far back')
 
-	local expired = false
+	local expired, called = false, false
 	while true do
 		if self.limit > 0 and self.number >= self.limit then
 			expired = true
@@ -56,17 +58,27 @@ function Clock:set (t)
 		self.callback(tick, unpack(self.args))
 		self.start = tick
 		self.number = self.number + 1
+		called = true
+	end
+	if self.post_call ~= nil and called then
+		self.post_call(unpack(self.post_args))
 	end
 	return expired
 end
 
+function Clock:post (callback, ...)
+	assert(isCallable(callback), 'post-set callback not a function')
+	self.post_call = callback
+	self.post_args = {...}
+end
+
 return {
 	after = function (interval, callback, ...)
-		return newClock(interval, callback, 1, ...)
+		return newClock(1, interval, callback, ...)
 	end,
 
 	-- see above: limit = 0 means unlimited
 	every = function (interval, callback, ...)
-		return newClock(interval, callback, 0, ...)
+		return newClock(0, interval, callback, ...)
 	end
 }
