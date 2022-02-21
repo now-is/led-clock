@@ -16,8 +16,8 @@ local function isPositiveInteger (value)
 	return isInteger(value) and value > 0
 end
 
-local Clock = {}
-local Clock_mt = {__index = Clock}
+local Clock, Group = {}, {}
+local Clock_mt, Group_mt = {__index = Clock}, {__index = Group}
 
 local function newClock (limit, interval, callback, ...)
 	assert(isPositiveInteger(interval), 'interval not a positive integer')
@@ -72,7 +72,21 @@ function Clock:post (callback, ...)
 	self.post_args = {...}
 end
 
-return {
+function Group:add (clock)
+	self[#self+1] = clock
+	return self
+end
+
+function Group:set (t)
+	local expired = true
+	for _, clock in ipairs(self) do
+		expired = clock:set(t) and expired
+	end
+	return expired
+end
+
+-- the library: defined, used to extend Group, and returned
+local cron = {
 	after = function (interval, callback, ...)
 		return newClock(1, interval, callback, ...)
 	end,
@@ -80,5 +94,19 @@ return {
 	-- see above: limit = 0 means unlimited
 	every = function (interval, callback, ...)
 		return newClock(0, interval, callback, ...)
-	end
+	end,
+
+	group = function ()
+		return setmetatable({}, Group_mt)
+	end,
 }
+
+function Group:after (...)
+	return self:add(cron.after(...))
+end
+
+function Group:every (...)
+	return self:add(cron.every(...))
+end
+
+return cron

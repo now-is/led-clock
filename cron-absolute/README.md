@@ -9,14 +9,14 @@ time on a clock, you cannot increment it by an interval.
 API
 ===
 
+Clocks
+------
+
 `local clock = cron.after(interval, callback, ...)`.
 Creates a clock that will execute `callback` after `interval` passes. If additional params were provided, they are passed to `callback`.
 
 `local clock = cron.every(interval, callback, ...)`.
 Creates a clock that will execute `callback` every `interval`, periodically. Additional parameters are passed to the `callback` too.
-
-
-Clock methods:
 
 `local expired = clock:set(t)`.
 Sets the time in the clock to `t`.
@@ -28,6 +28,29 @@ On subsequent `set`s:
 * A one-time clock invokes its `callback` if the time has increased by more than its `interval` from its start time.
 * A periodic clock invokes its `callback` 0 or more times, depending on how much its time has increased.
 * `expired` is true for one-time clocks whose `callback` has been invoked.
+
+
+Groups
+------
+
+A group of clocks all get set to the same time.
+
+`local clock_group = cron.group()`
+Creates an empty group of clocks.
+
+`clock_group = clock_group:add(clock)`.
+
+`clock_group = clock_group:after(interval, callback, ...)`.
+
+`clock_group = clock_group:every(interval, callback, ...)`.
+
+Add the appropriate type of clock to the group and return the group.
+
+
+`local expired = clock_group:set(t)`.
+
+Set every clock in the group to `t`. `expired` is true if every clock has expired.
+In particular it will be false if there is an `every` clock in the group.
 
 
 Examples

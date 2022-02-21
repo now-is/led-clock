@@ -2,16 +2,20 @@ local cron = require 'cron'
 
 describe('cron', function ()
 
-	local counter, called_at
+	local counter, called_at, progress_bar
 	local function increment (time, amount)
 		amount = amount or 1
 		counter = counter + amount
 		called_at = time
 	end
+	local function progress (chars)
+		progress_bar = progress_bar .. chars
+	end
 	local countable = setmetatable({}, {__call = increment})
 
 	before_each(function ()
 		counter = 0
+		progress_bar = ''
 	end)
 
 	describe(':set', function ()
@@ -156,22 +160,35 @@ describe('cron', function ()
 			local c = cron.every(2, increment)
 			c:set(0)
 
-			local progress = ''
-			c:post(function (ch) 
-				progress = progress .. ch
-			end, 'X')
+			c:post(progress, 'X')
 
 			c:set(4)
 			assert.equal(counter, 2)
-			assert.equal(progress, 'X')
+			assert.equal(progress_bar, 'X')
 
 			c:set(5)
 			assert.equal(counter, 2)
-			assert.equal(progress, 'X')
+			assert.equal(progress_bar, 'X')
 
 			c:set(7)
 			assert.equal(counter, 3)
-			assert.equal(progress, 'XX')
+			assert.equal(progress_bar, 'XX')
+		end)
+	end)
+
+	describe('.group', function ()
+		local g = cron.group()
+		local ce = cron.every(2, increment)
+		local ca = cron.after(3, increment, 10)
+
+		it('chains :add, :after and :every', function ()
+
+			assert.not_error(function ()
+				g:add(ce)
+					:after(3, increment)
+					:every(5, increment, 4)
+					:add(ca)
+			end)
 		end)
 	end)
 end)
