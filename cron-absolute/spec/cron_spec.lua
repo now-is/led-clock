@@ -177,18 +177,62 @@ describe('cron', function ()
 	end)
 
 	describe('.group', function ()
-		local g = cron.group()
-		local ce = cron.every(2, increment)
-		local ca = cron.after(3, increment, 10)
-
 		it('chains :add, :after and :every', function ()
-
+			local g = cron.group()
 			assert.not_error(function ()
 				g:add(ce)
 					:after(3, increment)
 					:every(5, increment, 4)
-					:add(ca)
+					:add(cron.after(3, increment, 10))
 			end)
+		end)
+
+		it('sets times on all its clocks', function ()
+			local counters = {0, 0, 0}
+			local function incr_at (tick, i, delta)
+				counters[i] = counters[i] + delta
+			end
+
+			local g = cron.group()
+				:every(1, incr_at, 1, 1) -- "elapsed"
+				:after(3, incr_at, 2, 1) -- "flag"
+				:every(5, incr_at, 3, 8) -- "mi to km"
+
+			assert.not_error(function () g:set(0) end)
+
+			g:set(1)  assert.are.same(counters, { 1, 0,  0})
+			g:set(2)  assert.are.same(counters, { 2, 0,  0})
+			g:set(3)  assert.are.same(counters, { 3, 1,  0})
+			g:set(4)  assert.are.same(counters, { 4, 1,  0})
+			g:set(5)  assert.are.same(counters, { 5, 1,  8})
+			g:set(6)  assert.are.same(counters, { 6, 1,  8})
+			g:set(10) assert.are.same(counters, {10, 1, 16})
+			g:set(12) assert.are.same(counters, {12, 1, 16})
+			g:set(15) assert.are.same(counters, {15, 1, 24})
+		end)
+
+		it('reports expiration of all clocks', function ()
+			local g = cron.group()
+				:after(1, increment)
+				:after(3, countable)
+				:after(5, increment)
+
+			g:set(0)
+
+			assert.is_false(g:set(1))
+			assert.is_false(g:set(2))
+			assert.is_false(g:set(3))
+			assert.is_false(g:set(4))
+
+			assert.is_true(g:set(5))
+			assert.is_true(g:set(6))
+			assert.is_true(g:set(7))
+
+			-- never expires
+			g:every(1, increment, 3)
+			assert.is_false(g:set(8))
+			assert.is_false(g:set(100))
+
 		end)
 	end)
 end)
