@@ -3,16 +3,16 @@ local led_segments = [[
 22c111111111111111111111111111d33
 222c1111111111111111111111111d333
 22222                       33333
-22222                       33333
-22222                       33333
-22222                       33333
-22222                       33333
-22222                       33333
-22222                       33333
-22222                       33333
-22222                       33333
-22222                       33333
-22222                       33333
+22222       A               33333
+22222      AA               33333
+22222     AAA               33333
+22222     AAA               33333
+22222      AA               33333
+22222     AAA               33333
+22222     AAA               33333
+22222     AAA               33333
+22222      AA               33333
+22222       A               33333
 22222                       33333
 222f4444444444444444444444444g333
  zz444444444444444444444444444yy 
@@ -49,15 +49,24 @@ local led_spec = {
 
 local cements = 'cdfgijlmyz'
 
+-- 0 =< j =< 19, in practice j is at most 12
 function digit (j, char)
 	if unpack == nil then
 		unpack = table.unpack
 	end
+
+	local segments_extra = ''
+	if j >= 10 then
+		j = j - 10
+		segments_extra = 'A'
+	end
+
 	local segments, cement = unpack(led_spec[j])
 	if segments == nil then
 		return
 	end
-	segments = led_segments:gsub('[^' .. segments .. cements .. '\n]', ' ')
+
+	segments = led_segments:gsub('[^' .. segments .. segments_extra .. cements .. '\n]', ' ')
 	if cement ~= nil then
 		segments = segments:gsub('[' .. cement .. ']', ' ')
 	end

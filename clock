@@ -17,7 +17,8 @@ local function rectangles_of (str, fill_char)
 		if c == ':' then
 			d = LED.colon:gsub('%S', fill_char)
 		else
-			d = LED.digit(tonumber(c), fill_char)
+			d = LED.digit(tonumber(c, 16), fill_char)
+-- print(string.format('%x', 16))
 		end
 		if d ~= nil then
 			rectangles[#rectangles+1] = d
@@ -78,7 +79,14 @@ local function main ()
 			if sec1 < sec0 then
 				scr:clear()
 				paint_markers(scr)
-				paint.rectangles(scr, l_zero, c_zero, rectangles_of(os.date('%H:%M'), '@'), c_space)
+
+				local hour = os.date('*t').hour % 12
+				if hour == 0 then
+					hour = 12
+				end
+				hour = string.format('%x', hour)
+
+				paint.rectangles(scr, l_zero, c_zero, rectangles_of(os.date(hour .. ':%M'), '@'), c_space)
 			else
 				update_blip(scr, sec0, noblip)
 			end
